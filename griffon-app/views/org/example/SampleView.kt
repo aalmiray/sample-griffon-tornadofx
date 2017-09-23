@@ -1,20 +1,20 @@
 package org.example
 
-import griffon.core.artifact.GriffonController
 import griffon.core.artifact.GriffonView
 import griffon.inject.MVCMember
 import griffon.metadata.ArtifactProviderFor
+import javafx.event.EventDispatchChain
+import javafx.event.EventTarget
 import javafx.scene.Scene
-import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 import javafx.stage.Window
 import org.codehaus.griffon.runtime.javafx.artifact.AbstractJavaFXGriffonView
-import javax.annotation.Nonnull
 import tornadofx.*
+import javax.annotation.Nonnull
 
 @ArtifactProviderFor(GriffonView::class)
-class SampleView : AbstractJavaFXGriffonView() {
+class SampleView : AbstractJavaFXGriffonView(), EventTarget {
     @set:[MVCMember Nonnull]
     lateinit var model: SampleModel
     @set:[MVCMember Nonnull]
@@ -28,16 +28,13 @@ class SampleView : AbstractJavaFXGriffonView() {
     }
 
     private fun _init(): Scene {
-        val root = GridPane()
-        with(root) {
-            prefWidth  = 200.0
-            prefHeight =  60.0
+        val root = gridpane {
+            setPrefSize(200.0, 60.0)
 
             row {
-                label {
-                    bind(model.clickCountProperty())
-                }
+                label(model.clickCountProperty())
             }
+
             row {
                 button {
                     id        = "clickActionTarget"
@@ -46,11 +43,16 @@ class SampleView : AbstractJavaFXGriffonView() {
             }
         }
 
-        val scene: Scene = Scene(root)
-        scene.fill = Color.WHITE
+        val scene = Scene(root).apply {
+            fill = Color.WHITE
+        }
 
         connectActions(root, controller)
         connectMessageSource(root)
         return scene
     }
+
+    override fun buildEventDispatchChain(tail: EventDispatchChain?) = null
+
 }
+
